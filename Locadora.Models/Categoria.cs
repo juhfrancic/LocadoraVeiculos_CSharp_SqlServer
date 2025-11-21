@@ -8,10 +8,34 @@ namespace Locadora.Models
 {
     public class Categoria
     {
-        public int CategoriaId { get; set; }
-        public string Nome { get; set; }
-        public string Descricao { get; set; }
-        public decimal Diaria { get; set; }
+        public readonly static string INSERTCATEGORIA = "EXEC sp_INSERIRCATEGORIA @Nome, @Descricao, @Diaria";
 
+        public readonly static string SELECTNOMECATEGORIAPORID = "SELECT Nome FROM tblCategorias WHERE CategoriaID = @Id";
+
+        public int CategoriaId { get; private set; }
+        public string Nome { get; private set; }
+        public string? Descricao { get; private set; }
+        public decimal Diaria { get; private set; }
+
+        public Categoria(string nome, decimal diaria)
+        {
+            Nome = nome;
+            Diaria = diaria;
+        }
+
+        public Categoria(string nome, decimal diaria, string? descricao) : this (nome, diaria)
+        {
+            Descricao = descricao;
+        }
+
+        public void setCategoriaId(int categoriaId)
+        {
+            CategoriaId = categoriaId;
+        }
+
+        public override string? ToString()
+        {
+            return $"Categoria: {Nome}\nDescrição: {Descricao}\nValor da Diária: {Diaria}\n";
+        }
     }
 }

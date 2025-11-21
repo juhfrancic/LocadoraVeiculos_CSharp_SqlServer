@@ -139,3 +139,23 @@ INSERT INTO tblLocacaoFuncionarios (LocacaoID, FuncionarioID) VALUES
 -- Pedro envolvido na Locação 2
 INSERT INTO tblLocacaoFuncionarios (LocacaoID, FuncionarioID) VALUES
 (2, 2);
+GO
+-- Stored Procedure para adicionar uma nova categoria de veículo
+CREATE OR ALTER PROCEDURE sp_INSERIRCATEGORIA
+    @NomeCategoria VARCHAR(50),
+    @DescricaoCategoria VARCHAR(255) NULL,
+    @DiariaCategoria DECIMAL(10,2)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    BEGIN TRY
+        INSERT INTO tblCategorias (Nome, Descricao, Diaria) 
+        VALUES (@NomeCategoria, @DescricaoCategoria, @DiariaCategoria);
+        
+        PRINT 'Categoria adicionada!'
+    END TRY
+    BEGIN CATCH 
+        PRINT 'Um erro aconteceu ao adicionar o cliente: ' + ERROR_MESSAGE()
+    END CATCH
+END   
