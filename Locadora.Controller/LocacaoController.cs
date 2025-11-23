@@ -15,8 +15,19 @@ namespace Locadora.Controller
 {
     public class LocacaoController : ILocacaoController
     {
-        public void AdicionarLocacao(Locacao locacao)
+        public void AdicionarLocacao(Locacao locacao, List<string> emailsFuncionarios)
         {
+            var funcionarioController = new FuncionarioController();
+
+            foreach(var email in emailsFuncionarios)
+            {
+                var funcionario = funcionarioController.BuscarFuncionarioPorEmail(email);
+
+                if (funcionario is null)
+                    throw new Exception($"Funcionario com o email {email} não encontrado!");
+
+                locacao.FuncionariosEnvolvidos.Add(funcionario);
+            }
             var veiculoController = new VeiculoController();
             Veiculo veiculo = veiculoController.BuscarVeiculoPorId(locacao.VeiculoID);
 
@@ -35,6 +46,7 @@ namespace Locadora.Controller
                 {
                     SqlCommand command = new SqlCommand(Locacao.INSERTLOCACAO, connection, transaction);
 
+
                     command.Parameters.AddWithValue("@ClienteID", locacao.ClienteID);
                     command.Parameters.AddWithValue("@VeiculoID", locacao.VeiculoID);
                     command.Parameters.AddWithValue("@DataLocacao", locacao.DataLocacao);
@@ -48,6 +60,19 @@ namespace Locadora.Controller
                     int locacaoId = Convert.ToInt32(command.ExecuteScalar());
                     locacao.setLocacaoId(locacaoId);
 
+
+                    var lfController = new LocacaoFuncionarioController();
+
+                    foreach(var funcionario in locacao.FuncionariosEnvolvidos)
+                    {
+                        lfController.AdicionarLocacaoFuncionario(
+                                locacaoId, 
+                                funcionario.FuncionarioID,
+                                connection,
+                                transaction
+                        );
+                    }
+
                     veiculoController.AtualizarStatusVeiculo(EStatusVeiculo.Alugado.ToString(), veiculo.Placa, connection, transaction);
                     transaction.Commit();
                 }
@@ -59,7 +84,7 @@ namespace Locadora.Controller
                 catch (Exception ex)
                 {
                     transaction.Rollback();
-                    throw new Exception("Erro insperado ao adicionar locação: " + ex.Message);
+                    throw new Exception("Erro inesperado ao adicionar locação: " + ex.Message);
                 }
                 finally
                 {

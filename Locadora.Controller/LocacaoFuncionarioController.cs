@@ -18,8 +18,8 @@ namespace Locadora.Controller
             try
             {
                 SqlCommand command = new SqlCommand(LocacaoFuncionario.INSERTLOCACAOFUNCIONARIO, connection, transaction);
-                command.Parameters.AddWithValue("@LocacaoId", locacaoId);
-                command.Parameters.AddWithValue("@FuncionarioId", funcionarioId);
+                command.Parameters.AddWithValue("@LocacaoID", locacaoId);
+                command.Parameters.AddWithValue("@FuncionarioID", funcionarioId);
 
                 command.ExecuteNonQuery();
 
@@ -43,8 +43,8 @@ namespace Locadora.Controller
                 try
                 {
                     SqlCommand command = new SqlCommand(LocacaoFuncionario.INSERTLOCACAOFUNCIONARIO, connection, transaction);
-                    command.Parameters.AddWithValue("@LocacaoId", locacaoId);
-                    command.Parameters.AddWithValue("@FuncionarioId", funcionarioId);
+                    command.Parameters.AddWithValue("@LocacaoID", locacaoId);
+                    command.Parameters.AddWithValue("@FuncionarioID", funcionarioId);
 
                     command.ExecuteNonQuery();
                     transaction.Commit();
