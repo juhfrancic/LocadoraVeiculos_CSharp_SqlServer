@@ -10,9 +10,10 @@ namespace Locadora.Models
     public class Locacao
     {
        public static readonly string INSERTLOCACAO = @"INSERT INTO tblLocacoes 
-                                                      (ClienteID, VeiculoID, DataLocacao, DataDevolucaoPrevista, ValorDiaria, DiasLocacao, Status)
-                                                      VALUES (@ClienteID, @VeiculoID, @DataLocacao, @DataDevolucaoPrevista, @ValorDiaria, @DiasLocacao, @Status);
+                                                      (ClienteID, VeiculoID, DataLocacao, DataDevolucaoPrevista, ValorDiaria, DiasLocacao, ValorTotal, Status)
+                                                      VALUES (@ClienteID, @VeiculoID, @DataLocacao, @DataDevolucaoPrevista, @ValorDiaria, @DiasLocacao, @ValorTotal, @Status);
                                                       SELECT SCOPE_IDENTITY();";
+
         public static readonly string BUSCARLOCACAOPORID = @"SELECT * FROM tblLocacoes WHERE LocacaoID = @LocacaoID";
 
         public static readonly string ATUALIZARLOCACAO = @"UPDATE tblLocacoes 
@@ -21,6 +22,8 @@ namespace Locadora.Models
                                                            Multa = @Multa, 
                                                            Status = @Status
                                                            WHERE LocacaoID = @LocacaoID";
+
+        public static readonly string LISTARLOCACOES = @"SELECT * FROM tblLocacoes ORDER BY DataLocacao DESC";
 
         public int LocacaoID { get; private set; }
         public int ClienteID { get; private set; }
@@ -33,6 +36,9 @@ namespace Locadora.Models
         public int DiasLocacao { get; private set; }    
         public decimal Multa { get; private set; }
         public EStatusLocacao Status { get; private set; }
+        public string NomeCliente { get; private set; }
+        public string ModeloVeiculo { get; private set; }
+
         public decimal MultaDiaria = 50.0m;
 
         public Locacao(int clienteID, int veiculoID, decimal valorDiaria, int diasLocacao)
@@ -45,6 +51,24 @@ namespace Locadora.Models
             ValorTotal = valorDiaria * diasLocacao;
             DataDevolucaoPrevista = DateTime.Now.AddDays(diasLocacao);
             Status = EStatusLocacao.Ativa;
+            Multa = 0;
+        }
+
+        public Locacao(int locacaoID, int clienteID, int veiculoID, DateTime dataLocacao, 
+                       DateTime dataDevolucaoPrevista, DateTime? dataDevolucaoReal, decimal valorDiaria, 
+                       decimal valorTotal, int diasLocacao, decimal multa, EStatusLocacao status)
+        {
+            LocacaoID = locacaoID;
+            ClienteID = clienteID;
+            VeiculoID = veiculoID;
+            DataLocacao = dataLocacao;
+            DataDevolucaoPrevista = dataDevolucaoPrevista;
+            DataDevolucaoReal = dataDevolucaoReal;
+            ValorDiaria = valorDiaria;
+            ValorTotal = valorTotal;
+            DiasLocacao = diasLocacao;
+            Multa = multa;
+            Status = status;
         }
 
         //TODO: Definir os valores de cliente e veiculo como nome e modelo respectivamente
@@ -52,6 +76,14 @@ namespace Locadora.Models
         public void setLocacaoId(int idLocacao)
         {
             LocacaoID = idLocacao;
+        }
+        public void setNomeCliente(string nomeCliente)
+        {
+            NomeCliente = nomeCliente;
+        }
+        public void setModeloVeiculo(string modeloVeiculo)
+        {
+            ModeloVeiculo = modeloVeiculo;
         }
 
         public void RegistrarDevolucao(DateTime dataDevolucaoReal)
@@ -64,7 +96,7 @@ namespace Locadora.Models
                 int diasAtraso = (DataDevolucaoReal.Value - DataDevolucaoPrevista).Days;
                 Multa = diasAtraso * MultaDiaria;
                 ValorTotal += Multa;
-                Console.WriteLine($"Devolução com atraso de {diasAtraso} dias. Multa aplicada: {Multa:C}");
+                Console.WriteLine($"Devolução com atraso de {diasAtraso} dias. Multa aplicada: {Multa:C}\n"); 
             }
             else
             {
@@ -74,12 +106,12 @@ namespace Locadora.Models
 
         public override string ToString()
         {
-            return $"Cliente: {ClienteID}\nVeiculo: {VeiculoID}\n" +
+            return $"Cliente: {NomeCliente}\nVeiculo: {ModeloVeiculo}\n" +
                 $"DataLocacao: {DataLocacao}\n" +
                 $"DataDevolucaoPrevista: {DataDevolucaoPrevista}\n" +
                 $"DataDevolucaoReal: {DataDevolucaoReal}\n" +
                 $"ValorDiaria: {ValorDiaria}\nValorTotal: {ValorTotal}\n" +
-                $"Multa: {Multa}\nStatus: {Status}";
+                $"Multa: {Multa}\nStatus: {Status}\n";
         }
     }
 }

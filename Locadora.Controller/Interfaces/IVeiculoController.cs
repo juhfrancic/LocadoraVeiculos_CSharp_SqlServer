@@ -1,4 +1,5 @@
 ﻿using Locadora.Models;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,7 @@ namespace Locadora.Controller.Interfaces
 
         public Veiculo BuscarVeiculoPorId(int veiculoId);
 
-        public void AtualizarStatusVeiculo(string statusVeiculo, string placa);
+        public void AtualizarStatusVeiculo(string statusVeiculo, string placa, SqlConnection connection, SqlTransaction transaction);
 
         public void DeletarVeiculo(int idVeiculo);
 

@@ -148,6 +148,57 @@ namespace Locadora.Controller
                 connection.Close();
             }
         }
+
+        public Cliente BuscarClientePorId(int clienteId)
+        {
+            SqlConnection connection = new SqlConnection(ConnectionDB.GetConnectionString());
+            connection.Open();
+            try
+            {
+                SqlCommand command = new SqlCommand(Cliente.SELECTCLIENTEPORID, connection);
+
+                command.Parameters.AddWithValue("@ClienteID", clienteId);
+
+                SqlDataReader reader = command.ExecuteReader();
+                if (reader.Read())
+                {
+                    var cliente = new Cliente(reader["Nome"].ToString(),
+                                                reader["Email"].ToString(),
+                                                reader["Telefone"] != DBNull.Value ?
+                                                reader["Telefone"].ToString() : null
+                                                );
+                    cliente.setClienteID(Convert.ToInt32(reader["ClienteID"]));
+
+                    if (reader["TipoDocumento"] != DBNull.Value &&
+                    reader["Numero"] != DBNull.Value &&
+                    reader["DataEmissao"] != DBNull.Value &&
+                    reader["DataValidade"] != DBNull.Value)
+                    {
+
+                        var documento = new Documento(reader["TipoDocumento"].ToString(),
+                                                  reader["Numero"].ToString(),
+                                                  DateOnly.FromDateTime(Convert.ToDateTime(reader["DataEmissao"])),
+                                                  DateOnly.FromDateTime(Convert.ToDateTime(reader["DataValidade"]))
+              );
+                        cliente.setDocumento(documento);
+                    }
+                    return cliente;
+                }
+                return null;
+            }
+            catch (SqlException ex)
+            {
+                throw new Exception("Erro ao buscar cliente por Id: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Erro inesperado ao buscar cliente por Id: " + ex.Message);
+            }
+            finally
+            {
+                connection.Close();
+            }
+        }
         public void AtualizarTelefoneCliente(string telefone, string email)
         {
             var clienteEncontrado = BuscaClientePorEmail(email);

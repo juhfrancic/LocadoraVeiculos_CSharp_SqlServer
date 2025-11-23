@@ -1,4 +1,5 @@
 ﻿using Locadora.Models;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace Locadora.Controller.Interfaces
         public void AdicionarLocacao(Locacao locacao);
         public List<Locacao> ListarTodasLocacoes();
         public Locacao BuscarLocacaoPorID(int locacaoID);
-        public void AtualizarLocacao(Locacao locacao);
-        public void DeletarLocacao(int locacaoID);
+        public void AtualizarLocacao(Locacao locacao, SqlConnection connection, SqlTransaction transaction);
+        public void ProcessarDevolucao(int locacaoID, DateTime dataDevolucao);
     }
 }

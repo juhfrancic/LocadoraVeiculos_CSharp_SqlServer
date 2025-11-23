@@ -49,15 +49,11 @@ namespace Locadora.Controller
             }
         }
 
-        public void AtualizarStatusVeiculo(string statusVeiculo, string placa)
+        public void AtualizarStatusVeiculo(string statusVeiculo, string placa, SqlConnection connection, SqlTransaction transaction)
         {
             Veiculo veiculo = BuscarVeiculoPlaca(placa) ??
                 throw new Exception("Veículo não encontrado para atualizar status.");
 
-            SqlConnection connection = new SqlConnection(ConnectionDB.GetConnectionString());
-            connection.Open();
-
-            using (SqlTransaction transaction = connection.BeginTransaction())
             {
                 SqlCommand command = new SqlCommand(Veiculo.UPDATESTATUSVEICULO, connection, transaction);
                 try
@@ -78,10 +74,6 @@ namespace Locadora.Controller
                 {
                     transaction.Rollback();
                     throw new Exception("Erro ao atualizar status do veículo: " + ex.Message);
-                }
-                finally
-                {
-                    connection.Close();
                 }
             }
         }
@@ -119,10 +111,7 @@ namespace Locadora.Controller
 
                             veiculo.setVeiculoID(reader.GetInt32(0));
 
-                            veiculo.setNomeCategoria(
-                                categoriaController.BuscarNomeCategoriaPorId(
-                                    veiculo.CategoriaID)
-                                );
+                            veiculo.setNomeCategoria(categoriaController.BuscarCategoriaPorId(veiculo.CategoriaID).Nome);
                         }
 
                     }
@@ -173,10 +162,7 @@ namespace Locadora.Controller
                             );
                             veiculo.setVeiculoID(reader.GetInt32(0));
 
-                            veiculo.setNomeCategoria(
-                                categoriaController.BuscarNomeCategoriaPorId(
-                                    veiculo.CategoriaID)
-                            );
+                            veiculo.setNomeCategoria(categoriaController.BuscarCategoriaPorId(veiculo.CategoriaID).Nome);
                         }
                     }
                 }
@@ -261,10 +247,7 @@ namespace Locadora.Controller
                                     status
                                 );
 
-                            veiculo.setNomeCategoria(
-                                categoriaController.BuscarNomeCategoriaPorId(
-                                    veiculo.CategoriaID)
-                                );
+                            veiculo.setNomeCategoria(categoriaController.BuscarCategoriaPorId(veiculo.CategoriaID).Nome);
 
                             veiculos.Add(veiculo);
                         }
