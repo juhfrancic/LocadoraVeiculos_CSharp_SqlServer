@@ -9,26 +9,63 @@ namespace Locadora.Controller
     {
         public void AdicionarCategoria(Categoria categoria)
         {
-            SqlConnection connection = new SqlConnection(ConnectionDB.GetConnectionString());
+            var connection = new SqlConnection(ConnectionDB.GetConnectionString());
             connection.Open();
+
+            using (SqlTransaction transaction = connection.BeginTransaction())
+            {
+                try
+                {
+                    var command = connection.CreateCommand();
+                    command.Transaction = transaction;
+                    command.CommandText = @"INSERT INTO dbo.tblCategorias (Nome, Descricao, Diaria) 
+                                            VALUES (@Nome, @Descricao, @Diaria)
+                                            SELECT SCOPE_IDENTITY()";
+
+                    command.Parameters.AddWithValue("@Nome", categoria.Nome);
+                    command.Parameters.AddWithValue("@Descricao", categoria.Descricao ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@Diaria", categoria.Diaria);
+                    int categoriaId = Convert.ToInt32(command.ExecuteScalar());
+                    categoria.setCategoriaId(categoriaId);
+                    transaction.Commit();
+                }
+                catch (Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+            }
+
+
+        }
+
+        public List<Categoria> ListarCategorias()
+        {
+            var connection = new SqlConnection(ConnectionDB.GetConnectionString());
             try
             {
+                connection.Open();
 
-                SqlCommand command = new SqlCommand(Categoria.INSERTCATEGORIA, connection);
+                SqlCommand command = new SqlCommand(Categoria.SELECTALLCATEGORIAS, connection);
 
-                command.Parameters.AddWithValue("@Nome", categoria.Nome);
-                command.Parameters.AddWithValue("@Descricao", categoria.Descricao ?? (object)DBNull.Value);
-                command.Parameters.AddWithValue("@Diaria", categoria.Diaria);
+                SqlDataReader reader = command.ExecuteReader();
+                List<Categoria> categorias = new List<Categoria>();
+                while (reader.Read())
+                {
+                    Categoria categoria = new Categoria(
+                        reader["Nome"].ToString(),
+                        Convert.ToDecimal(reader["Diaria"]),
+                        reader["Descricao"].ToString());
+                    categoria.setCategoriaId(Convert.ToInt32(reader["CategoriaId"]));
 
-                command.ExecuteNonQuery();
-            }
-            catch (SqlException ex)
-            {
-                throw new Exception("Erro ao adicionar categoria: " + ex.Message);
+                    categorias.Add(categoria);
+                }
+                reader.Close();
+                return categorias;
             }
             catch (Exception ex)
             {
-                throw new Exception("Erro inesperado ao adicionar categoria: " + ex.Message);
+                throw new Exception("Erro ao listar categorias: " + ex.Message);
             }
             finally
             {
@@ -36,32 +73,80 @@ namespace Locadora.Controller
             }
         }
 
-        public string BuscarNomeCategoriaPorId(int id)
+        public Categoria BuscarCategoriaPorId(int categoriaId)
         {
             var connection = new SqlConnection(ConnectionDB.GetConnectionString());
-            connection.Open();
-
             try
             {
-                SqlCommand command = new SqlCommand(Categoria.SELECTNOMECATEGORIAPORID, connection);
-                command.Parameters.AddWithValue("@Id", id);
-
-                string nomecategoria = String.Empty;
+                connection.Open();
+                SqlCommand command = new SqlCommand("SELECT CategoriaId, Nome, Diaria, Descricao FROM dbo.tblCategorias WHERE CategoriaId = @CategoriaId;", connection);
+                command.Parameters.AddWithValue("@CategoriaId", categoriaId);
 
                 SqlDataReader reader = command.ExecuteReader();
                 if (reader.Read())
                 {
-                    nomecategoria = reader["Nome"].ToString() ?? string.Empty;
+                    Categoria categoria = new Categoria(
+                        reader["Nome"].ToString(),
+                        Convert.ToDecimal(reader["Diaria"]),
+                        reader["Descricao"].ToString());
+                    categoria.setCategoriaId(Convert.ToInt32(reader["CategoriaId"]));
+                    reader.Close();
+                    return categoria;
                 }
-                return nomecategoria;
-            }
-            catch (SqlException ex)
-            {
-                throw new Exception("Erro ao buscar categoria." + ex.Message);
+                else
+                {
+                    reader.Close();
+                    return null;
+                }
             }
             catch (Exception ex)
             {
-                throw new Exception("Erro inesperado ao buscar categoria." + ex.Message);
+                throw new Exception("Erro ao buscar categoria por ID: " + ex.Message);
+            }
+            finally
+            {
+                connection.Close();
+            }
+        }
+
+        public void UpdateCategoria(Categoria categoria)
+        {
+            var connection = new SqlConnection(ConnectionDB.GetConnectionString());
+
+
+            try
+            {
+                connection.Open();
+                SqlCommand command = new SqlCommand(Categoria.UPDATECATEGORIA, connection);
+                command.Parameters.AddWithValue("@Nome", categoria.Nome);
+                command.Parameters.AddWithValue("@Descricao", categoria.Descricao);
+                command.Parameters.AddWithValue("@Diaria", categoria.Diaria);
+                command.Parameters.AddWithValue("@CategoriaId", categoria.CategoriaId);
+                command.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Erro ao atualizar categoria: " + ex.Message);
+            }
+            finally
+            {
+                connection.Close();
+            }
+        }
+
+        public void DeleteCategoria(int categoriaId)
+        {
+            var connection = new SqlConnection(ConnectionDB.GetConnectionString());
+            try
+            {
+                connection.Open();
+                SqlCommand command = new SqlCommand("DELETE FROM dbo.tblCategorias WHERE CategoriaId = @CategoriaId;", connection);
+                command.Parameters.AddWithValue("@CategoriaId", categoriaId);
+                command.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Erro ao deletar categoria: " + ex.Message);
             }
             finally
             {

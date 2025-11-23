@@ -112,7 +112,20 @@ namespace Locadora.Controller
         }
         public void AtualizarLocacao(Locacao locacao)
         {
-            throw new NotImplementedException();
+            using (SqlConnection connection = new SqlConnection(ConnectionDB.GetConnectionString()))
+            {
+                try
+                {
+                    connection.Open();
+                    SqlCommand command = new SqlCommand(Locacao.ATUALIZARLOCACAO, connection);
+
+                    command.Parameters.AddWithValue("@Locacao", locacao.LocacaoID);
+                    command.Parameters.AddWithValue("@DataDevolucaoReal", locacao.DataDevolucaoReal
+                                                    ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@ValorTotal", locacao.Va);
+                    command.Parameters.AddWithValue("@Multa", locacao.)
+                }
+            }
         }
         public void DeletarLocacao(int locacaoID)
         {
