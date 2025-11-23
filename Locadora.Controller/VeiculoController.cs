@@ -1,5 +1,6 @@
 ﻿using Locadora.Controller.Interfaces;
 using Locadora.Models;
+using Locadora.Models.Enums;
 using Microsoft.Data.SqlClient;
 
 using Utils.Databases;
@@ -106,13 +107,14 @@ namespace Locadora.Controller
                     {
                         while (reader.Read())
                         {
+                            EStatusVeiculo status = Enum.Parse<EStatusVeiculo>(reader["StatusVeiculo"].ToString());
                             veiculo = new Veiculo(
                                                 reader.GetInt32(1),
                                                 reader.GetString(2),
                                                 reader.GetString(3),
                                                 reader.GetString(4),
                                                 reader.GetInt32(5),
-                                                reader.GetString(6)
+                                                status
                                                 );
 
                             veiculo.setVeiculoID(reader.GetInt32(0));
@@ -140,8 +142,61 @@ namespace Locadora.Controller
 
                 return veiculo ?? throw new Exception("Veículo não encontrado");
             }
-
         }
+
+        public Veiculo BuscarVeiculoPorId(int veiculoId)
+        {
+            var categoriaController = new CategoriaController();
+            Veiculo veiculo = null;
+
+            SqlConnection connection = new SqlConnection(ConnectionDB.GetConnectionString());
+            connection.Open();
+
+            using (SqlCommand command = new SqlCommand(Veiculo.SELECTVEICULOBYID, connection))
+            {
+                try
+                {
+                    command.Parameters.AddWithValue("@VeiculoID", veiculoId);
+
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            EStatusVeiculo status = Enum.Parse<EStatusVeiculo>(reader["StatusVeiculo"].ToString());
+                            veiculo = new Veiculo(
+                                reader.GetInt32(1),  
+                                reader.GetString(2),                             
+                                reader.GetString(3),                             
+                                reader.GetString(4),                             
+                                reader.GetInt32(5),                              
+                                status                          
+                            );
+                            veiculo.setVeiculoID(reader.GetInt32(0));
+
+                            veiculo.setNomeCategoria(
+                                categoriaController.BuscarNomeCategoriaPorId(
+                                    veiculo.CategoriaID)
+                            );
+                        }
+                    }
+                }
+                catch (SqlException ex)
+                {
+                    throw new Exception("Erro ao encontrar veículo: " + ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Erro ao encontrar veículo: " + ex.Message);
+                }
+                finally
+                {
+                    connection.Close();
+                }
+            }
+
+            return veiculo ?? throw new Exception("Veículo não encontrado");
+        }
+
 
         public void DeletarVeiculo(int idVeiculo)
         {
@@ -196,13 +251,14 @@ namespace Locadora.Controller
                     {
                         while (reader.Read())
                         {
+                            EStatusVeiculo status = Enum.Parse<EStatusVeiculo>(reader["StatusVeiculo"].ToString());
                             Veiculo veiculo = new Veiculo(
                                     reader.GetInt32(0),
                                     reader.GetString(1),
                                     reader.GetString(2),
                                     reader.GetString(3),
                                     reader.GetInt32(4),
-                                    reader.GetString(5)
+                                    status
                                 );
 
                             veiculo.setNomeCategoria(

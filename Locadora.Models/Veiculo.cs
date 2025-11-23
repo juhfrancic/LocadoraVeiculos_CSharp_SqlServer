@@ -1,4 +1,6 @@
-﻿namespace Locadora.Models
+﻿using Locadora.Models.Enums;
+
+namespace Locadora.Models
 {
     public class Veiculo
     {
@@ -16,6 +18,12 @@
                                                             FROM tblVeiculos
                                                             WHERE Placa = @Placa";
 
+        public readonly static string SELECTVEICULOBYID = @"SELECT VeiculoID, CategoriaID, 
+                                                            Placa, Marca, Modelo, Ano, StatusVeiculo
+                                                            FROM tblVeiculos
+                                                            WHERE Placa = @Placa";
+
+
         public readonly static string UPDATESTATUSVEICULO = @"UPDATE tblVeiculos 
                                                             SET StatusVeiculo = @StatusVeiculo
                                                             WHERE VeiculoID = @IdVeiculo";
@@ -30,18 +38,18 @@
         public string Marca { get; private set; }
         public string Modelo { get; private set; }
         public int Ano { get; private set; }
-        public string StatusVeiculo { get; private set; }
+        public EStatusVeiculo StatusVeiculo { get; private set; }
 
         public Veiculo(int categoriaID, string placa, 
                         string marca, string modelo, 
-                        int ano, string statusVeiculo)
+                        int ano, EStatusVeiculo status)
         {
             CategoriaID = categoriaID;
             Placa = placa;
             Marca = marca;
             Modelo = modelo;
             Ano = ano;
-            StatusVeiculo = statusVeiculo;
+            StatusVeiculo = status;
         }
 
         public void setVeiculoID(int veiculoID)
@@ -54,7 +62,7 @@
             NomeCategoria = nomeCategoria;
         }
 
-        public void setStatusVeiculo(string statusVeiculo)
+        public void setStatusVeiculo(EStatusVeiculo statusVeiculo)
         {
             StatusVeiculo = statusVeiculo;
         }
