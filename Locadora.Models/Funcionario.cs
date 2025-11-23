@@ -29,6 +29,7 @@ namespace Locadora.Models
         public string Nome { get; private set; }
         public string CPF { get; private set; }
         public string Email { get; private set; }
+        public List<Locacao> LocacoesGerenciadas { get; set; } = new List<Locacao>();
         public decimal? Salario { get; private set; } = 0.0m;
         public Funcionario(string nome, string cPF, string email)
         {

@@ -32,12 +32,14 @@ namespace Locadora.Models
         public DateTime DataDevolucaoPrevista { get; private set; }
         public DateTime? DataDevolucaoReal { get; private set; }
         public decimal ValorDiaria { get; private set; }
-        public decimal ValorTotal { get; private set; }
+        public decimal? ValorTotal { get; private set; }
         public int DiasLocacao { get; private set; }    
-        public decimal Multa { get; private set; }
+        public decimal? Multa { get; private set; }
         public EStatusLocacao Status { get; private set; }
         public string NomeCliente { get; private set; }
         public string ModeloVeiculo { get; private set; }
+
+        public List<Funcionario> FuncionariosEnvolvidos { get; set; } = new List<Funcionario>();
 
         public decimal MultaDiaria = 50.0m;
 
@@ -52,6 +54,7 @@ namespace Locadora.Models
             DataDevolucaoPrevista = DateTime.Now.AddDays(diasLocacao);
             Status = EStatusLocacao.Ativa;
             Multa = 0;
+            FuncionariosEnvolvidos = new List<Funcionario>();
         }
 
         public Locacao(int locacaoID, int clienteID, int veiculoID, DateTime dataLocacao, 
@@ -69,6 +72,7 @@ namespace Locadora.Models
             DiasLocacao = diasLocacao;
             Multa = multa;
             Status = status;
+            FuncionariosEnvolvidos = new List<Funcionario>();
         }
 
         //TODO: Definir os valores de cliente e veiculo como nome e modelo respectivamente
