@@ -8,30 +8,28 @@ namespace Locadora.Models
 {
     public class Categoria
     {
-        public static readonly string INSERTCATEGORIA = @"INSERT INTO dbo.tblCategorias (Nome, Descricao, Diaria) 
+        public static readonly string INSERTCATEGORIA = @"INSERT INTO dbo.tblCategorias (Nome, Descricao, Diaria)
                                                         VALUES (@Nome, @Descricao, @Diaria)
                                                         SELECT SCOPE_IDENTITY();";
-
         public static readonly string SELECTALLCATEGORIAS = @"SELECT CategoriaId, Nome, Diaria, Descricao FROM dbo.tblCategorias";
-
-        public static readonly string BUSCARCATEGORIAPORID = @"SELECT CategoriaId, Nome, Diaria, Descricao 
-                                                            FROM dbo.tblCategorias 
+        public static readonly string BUSCARCATEGORIAPORID = @"SELECT CategoriaId, Nome, Diaria, Descricao
+                                                            FROM dbo.tblCategorias
                                                             WHERE CategoriaId = @CategoriaId";
-
-        public static readonly string UPDATECATEGORIA = @"UPDATE dbo.tblCategorias 
-                                                        SET Nome = @Nome, 
-                                                            Descricao = @Descricao, 
-                                                            Diaria = @Diaria 
+        public static readonly string UPDATECATEGORIA = @"UPDATE dbo.tblCategorias
+                                                        SET Nome = @Nome,
+                                                            Descricao = @Descricao,
+                                                            Diaria = @Diaria
                                                         WHERE CategoriaId = @CategoriaId";
-
-        public static readonly string DELETECATEGORIA = @"DELETE FROM dbo.tblCategorias 
+        public static readonly string DELETECATEGORIA = @"DELETE FROM dbo.tblCategorias
                                                         WHERE CategoriaId = @CategoriaId";
-
+        public static readonly string CHECKVEICULOSASSOCIADOS = @"SELECT COUNT(*)
+                                                                FROM dbo.tblVeiculos
+                                                                WHERE CategoriaID = @CategoriaId";
         public int CategoriaId { get; private set; }
         public string Nome { get; private set; }
         public decimal Diaria { get; private set; }
         public string? Descricao { get; private set; }
-        public Categoria(string nome, decimal preco, string descricao = "")                      
+        public Categoria(string nome, decimal preco, string descricao = "")
         {
             Nome = nome;
             Diaria = preco;
@@ -50,3 +48,4 @@ namespace Locadora.Models
         }
     }
 }
+

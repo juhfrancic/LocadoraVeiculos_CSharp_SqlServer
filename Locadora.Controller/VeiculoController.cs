@@ -62,17 +62,13 @@ namespace Locadora.Controller
                     command.Parameters.AddWithValue("@IdVeiculo", veiculo.VeiculoID);
                     
                     command.ExecuteNonQuery();
-                    
-                    transaction.Commit();
                 }
                 catch (SqlException ex)
                 {
-                    transaction.Rollback();
                     throw new Exception("Erro ao atualizar status do veículo no banco de dados: " + ex.Message);
                 }
                 catch (Exception ex)
                 {
-                    transaction.Rollback();
                     throw new Exception("Erro ao atualizar status do veículo: " + ex.Message);
                 }
             }
@@ -181,6 +177,34 @@ namespace Locadora.Controller
             }
 
             return veiculo ?? throw new Exception("Veículo não encontrado");
+        }
+
+        public void AtualizarStatusVeiculo(string statusVeiculo, string placa)
+        {
+            Veiculo veiculo = BuscarVeiculoPlaca(placa) ??
+                throw new Exception("Veículo não encontrado para atualizar status.");
+            SqlConnection connection = new SqlConnection(ConnectionDB.GetConnectionString());
+            using (SqlTransaction transaction = connection.BeginTransaction())
+            {
+                SqlCommand command = new SqlCommand(Veiculo.UPDATESTATUSVEICULO, connection, transaction);
+                try
+                {
+                    command.Parameters.AddWithValue("@StatusVeiculo", statusVeiculo);
+                    command.Parameters.AddWithValue("@IdVeiculo", veiculo.VeiculoID);
+                    command.ExecuteNonQuery();
+                    transaction.Commit();
+                }
+                catch (SqlException ex)
+                {
+                    transaction.Rollback();
+                    throw new Exception("Erro ao atualizar status do veículo no banco de dados: " + ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    throw new Exception("Erro ao atualizar status do veículo: " + ex.Message);
+                }
+            }
         }
 
 

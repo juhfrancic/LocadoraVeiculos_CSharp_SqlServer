@@ -11,17 +11,15 @@ namespace Locadora.Controller
         {
             var connection = new SqlConnection(ConnectionDB.GetConnectionString());
             connection.Open();
-
             using (SqlTransaction transaction = connection.BeginTransaction())
             {
                 try
                 {
                     var command = connection.CreateCommand();
                     command.Transaction = transaction;
-                    command.CommandText = @"INSERT INTO dbo.tblCategorias (Nome, Descricao, Diaria) 
+                    command.CommandText = @"INSERT INTO dbo.tblCategorias (Nome, Descricao, Diaria)
                                             VALUES (@Nome, @Descricao, @Diaria)
                                             SELECT SCOPE_IDENTITY()";
-
                     command.Parameters.AddWithValue("@Nome", categoria.Nome);
                     command.Parameters.AddWithValue("@Descricao", categoria.Descricao ?? (object)DBNull.Value);
                     command.Parameters.AddWithValue("@Diaria", categoria.Diaria);
@@ -35,19 +33,14 @@ namespace Locadora.Controller
                     throw;
                 }
             }
-
-
         }
-
         public List<Categoria> ListarCategorias()
         {
             var connection = new SqlConnection(ConnectionDB.GetConnectionString());
             try
             {
                 connection.Open();
-
                 SqlCommand command = new SqlCommand(Categoria.SELECTALLCATEGORIAS, connection);
-
                 SqlDataReader reader = command.ExecuteReader();
                 List<Categoria> categorias = new List<Categoria>();
                 while (reader.Read())
@@ -57,7 +50,6 @@ namespace Locadora.Controller
                         Convert.ToDecimal(reader["Diaria"]),
                         reader["Descricao"].ToString());
                     categoria.setCategoriaId(Convert.ToInt32(reader["CategoriaId"]));
-
                     categorias.Add(categoria);
                 }
                 reader.Close();
@@ -72,7 +64,6 @@ namespace Locadora.Controller
                 connection.Close();
             }
         }
-
         public Categoria BuscarCategoriaPorId(int categoriaId)
         {
             var connection = new SqlConnection(ConnectionDB.GetConnectionString());
@@ -81,7 +72,6 @@ namespace Locadora.Controller
                 connection.Open();
                 SqlCommand command = new SqlCommand("SELECT CategoriaId, Nome, Diaria, Descricao FROM dbo.tblCategorias WHERE CategoriaId = @CategoriaId;", connection);
                 command.Parameters.AddWithValue("@CategoriaId", categoriaId);
-
                 SqlDataReader reader = command.ExecuteReader();
                 if (reader.Read())
                 {
@@ -108,12 +98,9 @@ namespace Locadora.Controller
                 connection.Close();
             }
         }
-
         public void UpdateCategoria(Categoria categoria)
         {
             var connection = new SqlConnection(ConnectionDB.GetConnectionString());
-
-
             try
             {
                 connection.Open();
@@ -133,16 +120,22 @@ namespace Locadora.Controller
                 connection.Close();
             }
         }
-
         public void DeleteCategoria(int categoriaId)
         {
-            var connection = new SqlConnection(ConnectionDB.GetConnectionString());
+            SqlConnection connection = new SqlConnection(ConnectionDB.GetConnectionString());
             try
             {
                 connection.Open();
-                SqlCommand command = new SqlCommand("DELETE FROM dbo.tblCategorias WHERE CategoriaId = @CategoriaId;", connection);
-                command.Parameters.AddWithValue("@CategoriaId", categoriaId);
-                command.ExecuteNonQuery();
+                SqlCommand checkCommand = new SqlCommand(Categoria.CHECKVEICULOSASSOCIADOS, connection);
+                checkCommand.Parameters.AddWithValue("@CategoriaId", categoriaId);
+                int totalVeiculos = Convert.ToInt32(checkCommand.ExecuteScalar());
+                if (totalVeiculos > 0)
+                {
+                    throw new Exception("A categoria não pode ser deletada porque possui veículos associados.");
+                }
+                SqlCommand deleteCommand = new SqlCommand(Categoria.DELETECATEGORIA, connection);
+                deleteCommand.Parameters.AddWithValue("@CategoriaId", categoriaId);
+                deleteCommand.ExecuteNonQuery();
             }
             catch (Exception ex)
             {

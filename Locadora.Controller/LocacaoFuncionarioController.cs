@@ -4,6 +4,7 @@ using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Utils.Databases;
@@ -67,7 +68,7 @@ namespace Locadora.Controller
             }
         }
 
-        public void DeletarLocacaoFuncionario(int funcionarioId)
+        public void DeletarLocacaoFuncionario(int locacaoId, int funcionarioId)
         {
             SqlConnection connection = new SqlConnection(ConnectionDB.GetConnectionString());
             connection.Open();
@@ -125,12 +126,38 @@ namespace Locadora.Controller
                     }
 
                     reader.Close();
+
                     var locacaoController = new LocacaoController();
+                    var clienteController = new ClienteController();
+                    var veiculoController = new VeiculoController();
+
                     foreach (int locacaoID in locacoesIDs)
                     {
                         Locacao locacao = locacaoController.BuscarLocacaoPorID(locacaoID);
                         if (locacao != null)
+                        {
+                            var cliente = clienteController.BuscarClientePorId(locacao.ClienteID);
+                            var veiculo = veiculoController.BuscarVeiculoPorId(locacao.VeiculoID);
+
+                            if (cliente != null)
+                                locacao.setNomeCliente(cliente.Nome);
+
+                            if (veiculo != null)
+                                locacao.setModeloVeiculo(veiculo.Modelo);
                             locacoes.Add(locacao);
+                        }
+                    }
+
+                    foreach (var locacao in locacoes)
+                    {
+                        Console.WriteLine("---------------");
+                        Console.WriteLine($"ID: {locacao.LocacaoID}");
+                        Console.WriteLine($"Cliente: {locacao.NomeCliente}");
+                        Console.WriteLine($"Veículo: {locacao.ModeloVeiculo}");
+                        Console.WriteLine($"Data Locação: {locacao.DataLocacao}");
+                        Console.WriteLine($"Devolução Prevista: {locacao.DataDevolucaoPrevista}");
+                        Console.WriteLine($"Status: {locacao.Status}");
+                        Console.WriteLine("---------------\n");
                     }
 
                 }
@@ -173,11 +200,21 @@ namespace Locadora.Controller
                     reader.Close();
 
                     var funcionarioController = new FuncionarioController();
+
                     foreach(string email in emails)
                     {
                         Funcionario funcionario = funcionarioController.BuscarFuncionarioPorEmail(email);
-                        if (funcionario != null)
+                        if (funcionario != null) {
                             funcionarios.Add(funcionario);
+
+
+                            Console.WriteLine("---------------------");
+                            Console.WriteLine($"ID: {funcionario.FuncionarioID}");
+                            Console.WriteLine($"Nome: {funcionario.Nome}");
+                            Console.WriteLine($"Email: {funcionario.Email}");
+                            Console.WriteLine("---------------------\n");
+                        }
+                            
                     }
                     return funcionarios;
 

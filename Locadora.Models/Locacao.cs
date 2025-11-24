@@ -10,8 +10,8 @@ namespace Locadora.Models
     public class Locacao
     {
        public static readonly string INSERTLOCACAO = @"INSERT INTO tblLocacoes 
-                                                      (ClienteID, VeiculoID, DataLocacao, DataDevolucaoPrevista, ValorDiaria, DiasLocacao, ValorTotal, Status)
-                                                      VALUES (@ClienteID, @VeiculoID, @DataLocacao, @DataDevolucaoPrevista, @ValorDiaria, @DiasLocacao, @ValorTotal, @Status);
+                                                      (ClienteID, VeiculoID, DataLocacao, DataDevolucaoPrevista, ValorDiaria, ValorTotal, Status)
+                                                      VALUES (@ClienteID, @VeiculoID, @DataLocacao, @DataDevolucaoPrevista, @ValorDiaria, @ValorTotal, @Status);
                                                       SELECT SCOPE_IDENTITY();";
 
         public static readonly string BUSCARLOCACAOPORID = @"SELECT * FROM tblLocacoes WHERE LocacaoID = @LocacaoID";
@@ -29,6 +29,9 @@ namespace Locadora.Models
                                                            SET Status = @Status
                                                            WHERE LocacaoID = @LocacaoID";
 
+        public static readonly string LISTARLOCACOESATIVAS = @"SELECT * FROM tblLocacoes WHERE Status = 'Ativa' ORDER BY DataLocacao DESC";
+        public static readonly string BUSCARLOCACOESPORCLIENTEID = @"SELECT * FROM tblLocacoes WHERE ClienteID = @ClienteID ORDER BY DataLocacao DESC";
+
         public int LocacaoID { get; private set; }
         public int ClienteID { get; private set; }
         public int VeiculoID { get; private set; }
@@ -37,7 +40,6 @@ namespace Locadora.Models
         public DateTime? DataDevolucaoReal { get; private set; }
         public decimal ValorDiaria { get; private set; }
         public decimal? ValorTotal { get; private set; }
-        public int DiasLocacao { get; private set; }    
         public decimal? Multa { get; private set; }
         public EStatusLocacao Status { get; private set; }
         public string NomeCliente { get; private set; }
@@ -47,15 +49,17 @@ namespace Locadora.Models
 
         public decimal MultaDiaria = 50.0m;
 
-        public Locacao(int clienteID, int veiculoID, decimal valorDiaria, int diasLocacao)
+        public Locacao(int clienteID, int veiculoID, decimal valorDiaria, DateTime dataDevolucaoPrevista)
         {
             ClienteID = clienteID;
             VeiculoID = veiculoID;
             DataLocacao = DateTime.Now;
             ValorDiaria = valorDiaria;
-            DiasLocacao = diasLocacao;
+            DataDevolucaoPrevista = dataDevolucaoPrevista;
+
+            int diasLocacao = (DataDevolucaoPrevista - DataLocacao).Days;
             ValorTotal = valorDiaria * diasLocacao;
-            DataDevolucaoPrevista = DateTime.Now.AddDays(diasLocacao);
+
             Status = EStatusLocacao.Ativa;
             Multa = 0;
             FuncionariosEnvolvidos = new List<Funcionario>();
@@ -63,7 +67,7 @@ namespace Locadora.Models
 
         public Locacao(int locacaoID, int clienteID, int veiculoID, DateTime dataLocacao, 
                        DateTime dataDevolucaoPrevista, DateTime? dataDevolucaoReal, decimal valorDiaria, 
-                       decimal valorTotal, int diasLocacao, decimal multa, EStatusLocacao status)
+                       decimal valorTotal, decimal multa, EStatusLocacao status)
         {
             LocacaoID = locacaoID;
             ClienteID = clienteID;
@@ -73,7 +77,6 @@ namespace Locadora.Models
             DataDevolucaoReal = dataDevolucaoReal;
             ValorDiaria = valorDiaria;
             ValorTotal = valorTotal;
-            DiasLocacao = diasLocacao;
             Multa = multa;
             Status = status;
             FuncionariosEnvolvidos = new List<Funcionario>();
