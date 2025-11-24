@@ -216,6 +216,36 @@ namespace Locadora.Controller
             }
         }
 
+        public void CancelarLocacao(int locacaoID)
+        {
+            using(SqlConnection connection = new SqlConnection(ConnectionDB.GetConnectionString()))
+            {
+                connection.Open();
+                using(var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        SqlCommand command = new SqlCommand(Locacao.UPDATESTATUSLOCACAOCANCELADA, connection, transaction);
+                        command.Parameters.AddWithValue("@LocacaoID", locacaoID);
+                        command.Parameters.AddWithValue("@Status", EStatusLocacao.Cancelada.ToString());
+
+                        command.ExecuteNonQuery();
+                        transaction.Commit();
+                    }
+                    catch (SqlException ex)
+                    {
+                        transaction.Rollback();
+                        throw new Exception("Erro ao cancelar locacao: " + ex.Message);
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        throw new Exception("Erro ao cancelar locacao: " + ex.Message);
+                    }
+                }
+            }
+        }
+
         public void AtualizarLocacao(Locacao locacao, SqlConnection connection, SqlTransaction transaction)
         {
             {

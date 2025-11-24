@@ -25,6 +25,10 @@ namespace Locadora.Models
 
         public static readonly string LISTARLOCACOES = @"SELECT * FROM tblLocacoes ORDER BY DataLocacao DESC";
 
+        public static readonly string UPDATESTATUSLOCACAOCANCELADA = @"UPDATE tblLocacoes 
+                                                           SET Status = @Status
+                                                           WHERE LocacaoID = @LocacaoID";
+
         public int LocacaoID { get; private set; }
         public int ClienteID { get; private set; }
         public int VeiculoID { get; private set; }

@@ -2,9 +2,9 @@
 using Locadora.Models;
 
 #region Testes CRUD Locação
-//LocacaoController locacaoController = new LocacaoController();
+LocacaoController locacaoController = new LocacaoController();
 
-
+locacaoController.CancelarLocacao(1);
 //    Locacao locacao = new Locacao(1002, 1006, 400.00m, 4);
 
 //try
@@ -42,3 +42,6 @@ using Locadora.Models;
 //}
 #endregion
 
+//CancelarLocacao(int locacaoID, string novoStatus
+
+var locacaoFuncionarioController = new LocacaoFuncionarioController();
